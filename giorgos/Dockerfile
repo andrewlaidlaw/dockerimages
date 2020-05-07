@@ -6,30 +6,50 @@ LABEL maintainter "Jupyter Lab for WML CE"
 ENV CONDA=/opt/anaconda/condabin/conda
 
 # Install Apt packages
-RUN sudo apt update
-RUN sudo apt install -y git
+RUN sudo apt-get update
+RUN sudo apt install -y git gcc g++
+RUN sudo apt install -y openssl
 
 # Installl conda packages
 # RUN sudo $CONDA install -y -c conda-forge jupyterlab-nvdashboard
 # RUN $CONDA install -y -n wmlce -c conda-forge jupyterlab-nvdashboard
 # RUN $CONDA install -y -n wmlce jupyterlab
-RUN $CONDA install -y -n wmlce pytorch
-RUN $CONDA install -y -n wmlce --channel-priority -c https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/ -c powerai -c defaults -c conda-forge transformers=2.5.1
-RUN $CONDA install -y -n wmlce -c powerai tokenizers
-RUN $CONDA install -y -n wmlce scikit-learn
+RUN $CONDA install -y pytorch
+# RUN $CONDA install -y -n wmlce --channel-priority -c https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/ -c powerai -c defaults -c conda-forge transformers
+# RUN $CONDA install -y -n wmlce -c powerai tokenizers
+RUN $CONDA install -y scikit-learn
 
 # Set Jupyter executable location
-ENV JUPYTER=/opt/anaconda/envs/wmlce/bin/jupyter
+ENV JUPYTER=/opt/anaconda/bin/jupyter
 
 # Install pip packages
-ENV PIP=/opt/anaconda/envs/wmlce/bin/pip
+ENV PIP=/opt/anaconda/bin/pip
 RUN $PIP install setuptools_rust
 
 # Install rust from conda
-RUN $CONDA install -y -n wmlce -c powerai rust-nightly
+RUN $CONDA install -y -c powerai rust-nightly
+RUN $CONDA install -y cython
+# RUN $CONDA install -y -n wmlce rust
 
 # Clone git repository for Simple Transformers
-RUN which git
+RUN $CONDA install -y git
+ENV GIT=/opt/anaconda/bin/git
+ENV PYTHON=/opt/anaconda/bin/python
+
+RUN sudo mkdir simpletransformers
+RUN sudo chown pwrai:pwrai simpletransformers
+RUN $GIT clone https://github.com/ThilinaRajapakse/simpletransformers.git
+
+# RUN $PIP install tokenizers
+# RUN $PIP install -y rust
+
+RUN ls -al simpletransformers
+WORKDIR simpletransformers
+COPY setup.py .
+RUN cat setup.py
+
+RUN $PYTHON setup.py build
+RUN $PYTHON setup.py install
 
 # Install the NVDashboard extension for Jupyter lab
 # RUN $JUPYTER labextension install jupyterlab-nvdashboard
@@ -49,4 +69,4 @@ ENV IBM_POWERAI_LICENSE_ACCEPT=yes
 EXPOSE 8888
 
 # Run the start up script
-CMD ["./start.sh"]
+# CMD ["./start.sh"]
