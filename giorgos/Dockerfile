@@ -17,19 +17,16 @@ RUN sudo apt install -y openssl
 RUN $CONDA install -y pytorch
 # RUN $CONDA install -y -n wmlce --channel-priority -c https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/ -c powerai -c defaults -c conda-forge transformers
 # RUN $CONDA install -y -n wmlce -c powerai tokenizers
-RUN $CONDA install -y scikit-learn
+RUN $CONDA install -y scikit-learn pkgconfig h5py cython
+RUN $CONDA install -y -c powerai rust-nightly
 
 # Set Jupyter executable location
 ENV JUPYTER=/opt/anaconda/bin/jupyter
 
 # Install pip packages
 ENV PIP=/opt/anaconda/bin/pip
+RUN $PIP install tokenizers==0.52 transformers==2.6.0
 RUN $PIP install setuptools_rust
-
-# Install rust from conda
-RUN $CONDA install -y -c powerai rust-nightly
-RUN $CONDA install -y cython
-# RUN $CONDA install -y -n wmlce rust
 
 # Clone git repository for Simple Transformers
 RUN $CONDA install -y git
@@ -50,9 +47,6 @@ RUN cat setup.py
 
 RUN $PYTHON setup.py build
 RUN $PYTHON setup.py install
-
-# Install the NVDashboard extension for Jupyter lab
-# RUN $JUPYTER labextension install jupyterlab-nvdashboard
 
 # Copy startup script
 COPY start.sh .
