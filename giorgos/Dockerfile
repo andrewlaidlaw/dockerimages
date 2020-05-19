@@ -7,7 +7,7 @@ ENV CONDA=/opt/anaconda/condabin/conda
 
 # Install Apt packages
 RUN sudo apt-get update
-RUN sudo apt install -y git gcc g++
+RUN sudo apt install -y git build-essential
 RUN sudo apt install -y openssl
 
 # Installl conda packages
