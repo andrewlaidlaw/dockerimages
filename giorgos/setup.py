@@ -25,13 +25,13 @@ setup(
         "requests",
         "tqdm",
         "regex",
-        "transformers>=2.8.0",
+        "transformers>=2.6.0",
         "scipy",
         "scikit-learn",
         "seqeval",
         "tensorboardx",
         "pandas",
-        "tokenizers==0.6.0",
+        "tokenizers",
     ],
 )
 
