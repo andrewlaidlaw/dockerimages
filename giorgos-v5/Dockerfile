@@ -4,6 +4,7 @@ LABEL maintainter "Andrew Laidlaw"
 
 # Original Docker image came from a commit of a container with
 # Simpletransformers and Jupyter Lab installed and working
+# Adding the startup script to get Jupyterlab running
 
 # Copy startup script
 COPY start.sh .
