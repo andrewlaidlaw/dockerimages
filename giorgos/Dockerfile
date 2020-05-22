@@ -1,4 +1,4 @@
-FROM jupyterlab-base:0.2
+FROM ibmcom/powerai:1.7.0-base-ubuntu18.04-py36
 
 LABEL maintainter "Jupyter Lab for WML CE"
 
@@ -7,52 +7,63 @@ ENV CONDA=/opt/anaconda/condabin/conda
 
 # Install Apt packages
 RUN sudo apt-get update
-RUN sudo apt install -y git gcc g++
+RUN sudo apt install -y git build-essential
 RUN sudo apt install -y openssl
 
 # Installl conda packages
 # RUN sudo $CONDA install -y -c conda-forge jupyterlab-nvdashboard
 # RUN $CONDA install -y -n wmlce -c conda-forge jupyterlab-nvdashboard
-# RUN $CONDA install -y -n wmlce jupyterlab
-RUN $CONDA install -y pytorch
+RUN $CONDA install -y -n wmlce jupyterlab
+RUN $CONDA install -y -n wmlce pytorch
 # RUN $CONDA install -y -n wmlce --channel-priority -c https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/ -c powerai -c defaults -c conda-forge transformers
 # RUN $CONDA install -y -n wmlce -c powerai tokenizers
-RUN $CONDA install -y scikit-learn
+RUN $CONDA install -y -n wmlce scikit-learn pkgconfig h5py cython pandas
+RUN $CONDA install -y -n wmlce -c powerai rust-nightly
+RUN $CONDA install -y -n wmlce -c powerai sentencepiece
 
 # Set Jupyter executable location
-ENV JUPYTER=/opt/anaconda/bin/jupyter
+# ENV JUPYTER=/opt/anaconda/bin/jupyter
+ENV JUPYTER=/opt/anaconda/envs/wmlce/bin/jupyter
 
 # Install pip packages
-ENV PIP=/opt/anaconda/bin/pip
-RUN $PIP install setuptools_rust
+# ENV PIP=/opt/anaconda/bin/pip
+ENV PIP=/opt/anaconda/envs/wmlce/bin/pip
 
-# Install rust from conda
-RUN $CONDA install -y -c powerai rust-nightly
-RUN $CONDA install -y cython
-# RUN $CONDA install -y -n wmlce rust
+RUN sudo apt-get update -y
+RUN sudo apt install -y rustc
+
+RUN $PIP install setuptools-rust
+# RUN $CONDA install -y -n wmlce --channel-priority -c https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/ -c powerai -c defaults -c conda-forge transformers
+# RUN $CONDA install -y -n wmlce -c powerai tokenizers
+# RUN $PIP install tokenizers==0.5.2
+RUN $PIP install transformers==2.6.0 tokenizers==0.5.2
+# RUN $PIP install setuptools_rust
 
 # Clone git repository for Simple Transformers
-RUN $CONDA install -y git
-ENV GIT=/opt/anaconda/bin/git
-ENV PYTHON=/opt/anaconda/bin/python
+RUN $CONDA install -y -n wmlce git
+# ENV GIT=/opt/anaconda/bin/git
+ENV GIT=/opt/anaconda/envs/wmlce/bin/git
+# ENV PYTHON=/opt/anaconda/bin/python
+ENV PYTHON=/opt/anaconda/envs/wmlce/bin/python
 
-RUN sudo mkdir simpletransformers
-RUN sudo chown pwrai:pwrai simpletransformers
+# RUN sudo mkdir simpletransformers
+# RUN sudo chown pwrai:pwrai simpletransformers
+WORKDIR /home/pwrai
 RUN $GIT clone https://github.com/ThilinaRajapakse/simpletransformers.git
 
 # RUN $PIP install tokenizers
 # RUN $PIP install -y rust
+# RUN $CONDA install -y -n wmlce -c conda-forge rust
 
 RUN ls -al simpletransformers
 WORKDIR simpletransformers
 COPY setup.py .
 RUN cat setup.py
 
+RUN $CONDA list -n wmlce
+
 RUN $PYTHON setup.py build
 RUN $PYTHON setup.py install
-
-# Install the NVDashboard extension for Jupyter lab
-# RUN $JUPYTER labextension install jupyterlab-nvdashboard
 
 # Copy startup script
 COPY start.sh .
